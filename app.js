@@ -88,6 +88,7 @@ const dinos = [
 ]
 
 
+
 // Create Human Object
 function Human(formValues){
     return {
@@ -102,8 +103,14 @@ function Human(formValues){
 let human = {}
 
 // Use IIFE to get human data from form
-const button = document.getElementById('btn')
 
+
+/**
+* @description listens to the click event on the form and triggers the infographic generation
+* @param {string} event - event to listen to
+* @param {function} callback - the function to execute when the event happens
+*/
+const button = document.getElementById('btn')
 button.addEventListener('click', (function() {
     
     return function readFormData(){
@@ -128,9 +135,9 @@ button.addEventListener('click', (function() {
 
 
 /**
-* @description creates an image object
-* @param {object} dino
-* @returns {string} relative path to the image of the species
+* @description validates if the form inputs are not empty.
+* @param {array} formValues - the values of the form to validate
+* @returns {boolean} - true if the form is not empty, false otherwise
 */
 function validateFullInputs(formValues){
 
@@ -142,77 +149,6 @@ function validateFullInputs(formValues){
 }
 
 
-// Create Dino Compare Method 1
-// NOTE: Weight in JSON file is in lbs, height in inches. 
-
-
-// Create Dino Compare Method 2
-// NOTE: Weight in JSON file is in lbs, height in inches.
-
-
-// Create Dino Compare Method 3
-// NOTE: Weight in JSON file is in lbs, height in inches.
-
-
-// Generate Tiles for each Dino in Array
-
-/**
-* @description gets the image path of the given species
-* @param {object} dino
-* @returns {string} relative path to the image of the species
-*/
-function getDinoFilename(dino){
-    let filename = `images/${dino['species'].toLowerCase()}.png`
-    return filename
-}
-
-
-/**
-* @description creates an image object
-* @param {object} dino
-* @returns {string} relative path to the image of the species
-*/
-function createImage(dino){
-    let image = document.createElement('img')
-    image.src = getDinoFilename(dino)
-    image.width = 480
-    image.height = 360
-    return image
-}
-
-
-/**
-* @description creates a div tile with the information in the object
-* @param {object} 
-* @returns {string} html code for the tile
-*/
-function createTile(infoObject){
-    
-    let tile = document.createElement('div')
-    tile.style.background = 'white'
-    
-    //create name header
-    let dinoName = document.createElement('h2')
-    dinoName.innerText = infoObject['species']
-    dinoName.id = 'tile-title'
-
-    //add image
-    let image = createImage(infoObject);
-    
-    //add random fact
-    let randomFact = document.createElement('p')
-    randomFact.innerText = infoObject['fact']
-    randomFact.id = 'random-fact'
-
-    tile.appendChild(dinoName)
-    tile.appendChild(image)
-    tile.appendChild(randomFact)
-       
-    return tile
-}
-
-
-    
 /**
 * @description simple algorithm to shuffle elements in an array
 * @param {object} input array 
@@ -236,34 +172,118 @@ function shuffleElements(array){
 
 
 
-// Add tiles to DOM
+
+// Create Dino Compare Method 1
+// NOTE: Weight in JSON file is in lbs, height in inches. 
+
+
+// Create Dino Compare Method 2
+// NOTE: Weight in JSON file is in lbs, height in inches.
+
+
+// Create Dino Compare Method 3
+// NOTE: Weight in JSON file is in lbs, height in inches.
+
+
+// Generate Tiles for each Dino in Array
+
+
+/**
+* @description gets the image path of the given species
+* @param {object} dino
+* @returns {string} relative path to the image of the species
+*/
+function getDinoFilename(speciesName){
+    let filename = `images/${speciesName.toLowerCase()}.png`
+    return filename
+}
+
+
+function createGridItem(){
+    let gridItem = document.createElement('div')
+    gridItem.className = 'grid-item'
+    return gridItem
+}
+
+function createHeaderBlock(headerText){
+    let header = document.createElement('h3');
+    header.innerText = headerText
+    return header
+}
+
+function createImageBlock(speciesName){
+    let image = document.createElement('img')
+    image.src = getDinoFilename(speciesName)
+    return image
+}
+
+function createFactBlock(factText){
+    let fact = document.createElement('p')
+    fact.innerText = factText
+    return fact
+}
+
+function createDinoTile(dinoObject){
+    
+    let gridItem = createGridItem()
+    let header = createHeaderBlock(dinoObject['species'])
+    let image = createImageBlock(dinoObject['species'])
+    let fact = createFactBlock(dinoObject['fact'])
+
+    gridItem.appendChild(header)
+    gridItem.appendChild(image)
+    gridItem.appendChild(fact)
+       
+    return gridItem
+}
+
+
+function createHumanTile(humanObject){
+    
+    let gridItem = createGridItem()
+    let header = createHeaderBlock(humanObject['name'])
+    let image = createImageBlock(humanObject['species'])
+
+    gridItem.appendChild(header)
+    gridItem.appendChild(image)
+       
+    return gridItem
+}
+
+
 function createTiles(){
 
-    let tiles = []
-    dinos.forEach(function(dinoObject){
-        tiles.push(createTile(dinoObject))
+    //shuffle dinos
+    let shuffled_dinos = shuffleElements(dinos)
+
+    //create dino tiles
+    let gridItems = []
+    shuffled_dinos.forEach(function(item){
+        gridItems.push(createDinoTile(item))
     })
 
-    //shuffle tiles
-    tiles = shuffleElements(tiles)
-
     //add human tile at the center
-    let humanTile = createTile(Object.assign(human, {'fact': '', 'species': 'human'}))
-    tiles.splice(4,0, humanTile)
+    let humanItem = createHumanTile(Object.assign(human, {'species': 'human'}))
+    gridItems.splice(4,0, humanItem)
+
+    //add styletiles grid
+    for (let index = 0; index < gridItems.length; index++) {
+        gridItems[index].className = gridItems[index].className + ` grid-item:nth-child(${index + 1})`  
+    }
 
     //add tiles to DOM
-    tiles.forEach(function(tile){
-        document.getElementById('grid').appendChild(tile)
+    gridItems.forEach(function(item){
+        document.getElementById('grid').appendChild(item)
     })
 }
 
     
 
-
-    
-
-
-// Remove form from screen
+/**
+* @description remove the form from the DOM
+* @param no params
+* @returns no returns
+*/
 function removeForm(){
     let form = document.getElementById('dino-compare')
     form.remove()
@@ -274,5 +294,4 @@ function removeForm(){
 function createInfographic(){
     removeForm();
     createTiles();
-
 }
