@@ -1,17 +1,17 @@
-// Create Dino Constructor
-function Dino(species, weight, height, diet, where, when, fact) {
-    return {
-        weight: weight,
-        species: species,
-        height: height,
-        diet: diet,
-        where: where,
-        when: when,
-        fact: fact
-    }
+/**
+* @description factory function for the Dinosaur objects
+* @constructor
+* @param {object} characteristics - species of the dinosaur
+* @return {object} Dino object
+*/
+function Dino(object) {
+    return Object.assign({}, object)
 }
 
-// Create Dino Objects
+
+/**
+ * @description example dinosaurs to show on the project
+ */
 const dinos = [
     {
         "species": "Triceratops",
@@ -87,22 +87,31 @@ const dinos = [
     }
 ]
 
+let dinoObjects = dinos.map(function(item){
+    return Dino(item)
+})
 
 
-// Create Human Object
+/**
+* @description constructor for the Human objects
+* @constructor
+* @return {object} Human object with the calculated fields
+*/
 function Human(formValues){
+
+    heightFeet = formValues[1],
+    heightInches = formValues[2],
+    height = parseInt(heightFeet)*12 + parseInt(heightInches)
+    weight = parseInt(formValues[3])
+
     return {
-        species: formValues[0],
-        heightFeet: formValues[1],
-        heightInches: formValues[2],
-        weight: formValues[3],
-        diet: formValues[4]
+        name: formValues[0],
+        height: height,
+        weight: weight,
+        diet: formValues[4],
+        species: 'Human'
     }
-}
-
-let human = {}
-
-// Use IIFE to get human data from form
+};
 
 
 /**
@@ -126,14 +135,237 @@ button.addEventListener('click', (function() {
             alert('Please fill all the inputs')
         }
         else{
-            human = Human(formValues);
-            createInfographic();
-
+            let human = Human(formValues);
+            generateInfographic(dinoObjects, human);
         }
     }
 })());
 
+// Create Dino Compare Method 1
+// NOTE: Weight in JSON file is in lbs, height in inches.
+/**
+* @description compares the user height with the dinosaur and returns a message
+* @param {object} dinoObject - Dino object to compare to
+* @param {object} humanObject - Human object to compare
+* @return {string} the generated fact based on the comparison
+*/
+function compareAndGenerateFact1(dinoObject, humanObject){
+    if (humanObject.height >= dinoObject.height){
+        return `If this was the ${dinoObject.when}, you would be safe, you are are taller than the ${dinoObject.species}!`
+    }
+    else {
+        return `This dinosaur is more than ${Math.floor(dinoObject.height/humanObject.height)} ${humanObject.name}s tall`
+    }
+}
 
+
+// Create Dino Compare Method 2
+// NOTE: Weight in JSON file is in lbs, height in inches.
+/** 
+* @description compares the user weight with the dinosaur and returns a message
+* @param {object} dinoObject - Dino object to compare to
+* @param {object} humanObject - Human object to compare
+* @return {string} the generated fact based on the comparison
+*/
+function compareAndGenerateFact2(dinoObject, humanObject){
+    if (humanObject.weight >= dinoObject.weight){
+        return `It sounds impossible, but you weight more than this dinosaur.`
+    }
+    else {
+        return `Could you lift a ${dinoObject.species}? I'm not very optimistic about that.`
+    }
+}
+
+// Create Dino Compare Method 3
+// NOTE: Weight in JSON file is in lbs, height in inches.
+/** 
+* @description compares the user diet with the dinosaur and returns a message
+* @param {object} dinoObject - Dino object to compare to
+* @param {object} humanObject - Human object to compare
+* @return {string} the generated fact based on the comparison
+*/
+function compareAndGenerateFact3(dinoObject, humanObject){
+    if (humanObject.diet == dinoObject.diet){
+        return `You and ${dinoObject.species} would get along. You're both ${dinoObject.diet}`
+    }
+    else {
+        return `In the ${dinoObject.when}, ${dinoObject.species} would not share its food with you.`
+    }
+}
+
+
+//We create a separate function for each element of the grid 
+/**
+* @description creates a grid item 
+* @returns {object} returns the grid item with the associated class
+*/
+function createGridItem(){
+    let gridItem = document.createElement('div')
+    gridItem.className = 'grid-item'
+    return gridItem
+}
+
+
+/**
+* @description creates the header of the grid item
+* @param {string} headerText - the text string to use as title 
+* @returns {object} returns the header element
+*/
+function createHeaderBlock(headerText){
+    let header = document.createElement('h3');
+    header.innerText = headerText
+    return header
+}
+
+
+/**
+* @description creates the image element of the grid item
+* @param {string} headerText - the text string to use as title 
+* @returns {object} returns the image element
+*/
+function createImageBlock(speciesName){
+    let image = document.createElement('img')
+    image.src = getFilename(speciesName)
+    return image
+}
+
+/**
+* @description creates the paragraph element of the grid item
+* @param {string} factText - the fact to show in the element
+* @returns {object} return the fact element
+*/
+function createFactBlock(factText){
+    let fact = document.createElement('p')
+    fact.innerText = factText
+    return fact
+}
+
+function generateFact(animalObject, humanObject){
+    //if its a pigeon print the regular fact
+    if (animalObject.species == 'Pigeon'){
+        return animalObject.fact
+    }
+    //if its a dinosaur generate a random fact
+    else{
+        number = Math.floor(Math.random()*11)
+        if (number <= 4){
+            factText = animalObject.fact
+        }
+        else if(number <= 6){
+            factText = compareAndGenerateFact1(animalObject, humanObject);
+        }
+        else if (number <= 8){
+            factText = compareAndGenerateFact2(animalObject, humanObject);
+        }
+        else {
+            factText = compareAndGenerateFact3(animalObject, humanObject);
+        }
+    }
+
+    return factText
+}
+
+/**
+* @description creates the tile for the Dinosaurs and the Bird
+* @param {object} dinoObject - the dinosaur object created with the constructor
+* @returns {object} return the grid element to append to the DOM
+*/
+function createDinoGridItem(dinoObject, humanObject){
+    
+    let gridItem = createGridItem()
+    let header = createHeaderBlock(dinoObject['species'])
+    let image = createImageBlock(dinoObject['species'])
+    let fact = createFactBlock(generateFact(dinoObject, humanObject))
+
+    gridItem.appendChild(header)
+    gridItem.appendChild(image)
+    gridItem.appendChild(fact)
+       
+    return gridItem
+}
+
+
+/**
+* @description creates the tile for the Human (without a fact)
+* @param {object} humanObject - the human object created with the constructor
+* @returns {object} return the grid element to append to the DOM
+*/
+function createHumanGridItem(humanObject){
+    
+    let gridItem = createGridItem()
+    let header = createHeaderBlock(humanObject['name'])
+    let image = createImageBlock(humanObject['species'])
+
+    gridItem.appendChild(header)
+    gridItem.appendChild(image)
+       
+    return gridItem
+}
+
+
+/**
+* @description creates the tile for the Human (without a fact)
+* @param {object} humanObject - the human object created with the constructor
+* @returns {object} return the grid element to append to the DOM
+*/
+function createGridItems(dinoObjects, humanObject){
+
+    //shuffle dinos 
+    dinoObjects = shuffleElements(dinoObjects)
+
+    //create dino tiles
+    let gridItems = []
+    dinoObjects.forEach(function(dinoObject){
+        gridItems.push(createDinoGridItem(dinoObject, humanObject))
+    })
+
+    //add human tile at the center
+    let humanItem = createHumanGridItem(humanObject)
+    gridItems.splice(4,0, humanItem)
+
+    return gridItems
+}
+
+
+/**
+* @description add the grid elements to the DOM
+* @param {array} gridItems - an array with the ordered grid items to add
+*/
+function drawGrid(gridItems){
+
+    //add style to grid elements
+    for (let index = 0; index < gridItems.length; index++) {
+        gridItems[index].className = gridItems[index].className + ` grid-item:nth-child(${index + 1})`  
+    }
+
+    //add grid items to DOM
+    gridItems.forEach(function(item){
+        document.getElementById('grid').appendChild(item)
+    })    
+};
+
+
+/**
+* @description remove the form from the DOM
+* @returns none
+*/
+function removeForm(){
+    let form = document.getElementById('dino-compare')
+    form.remove()
+};
+
+
+/**
+* @description generate the infographic on the form submission
+*/
+function generateInfographic(dinoObjects, humanObject){
+    removeForm();
+    let gridItems = createGridItems(dinoObjects, humanObject);
+    drawGrid(gridItems);
+}
+
+
+//Helper functions
 /**
 * @description validates if the form inputs are not empty.
 * @param {array} formValues - the values of the form to validate
@@ -150,8 +382,19 @@ function validateFullInputs(formValues){
 
 
 /**
-* @description simple algorithm to shuffle elements in an array
-* @param {object} input array 
+* @description helper function to get the path of an image
+* @param {string} speciesName - the name of the species to generate the path
+* @returns {string} relative path to the .png image of the species
+*/
+function getFilename(speciesName){
+    let filename = `images/${speciesName.toLowerCase()}.png`
+    return filename
+}
+
+
+/**
+* @description helper function with a simple algorithm to shuffle elements in an array
+* @param {object} array - input array to shuffle
 * @returns {object} output array with elements shuffled
 */
 function shuffleElements(array){
@@ -160,7 +403,6 @@ function shuffleElements(array){
     let length = array.length
     
     for (let index = 0; index < length; index++) {
-
         //on each iteration select a random element and add it to the new_array
         removeIndex = Math.floor(Math.random() * array.length)
         new_array.push(array[removeIndex])
@@ -168,130 +410,4 @@ function shuffleElements(array){
     }
     
     return new_array
-}
-
-
-
-
-// Create Dino Compare Method 1
-// NOTE: Weight in JSON file is in lbs, height in inches. 
-
-
-// Create Dino Compare Method 2
-// NOTE: Weight in JSON file is in lbs, height in inches.
-
-
-// Create Dino Compare Method 3
-// NOTE: Weight in JSON file is in lbs, height in inches.
-
-
-// Generate Tiles for each Dino in Array
-
-
-/**
-* @description gets the image path of the given species
-* @param {object} dino
-* @returns {string} relative path to the image of the species
-*/
-function getDinoFilename(speciesName){
-    let filename = `images/${speciesName.toLowerCase()}.png`
-    return filename
-}
-
-
-function createGridItem(){
-    let gridItem = document.createElement('div')
-    gridItem.className = 'grid-item'
-    return gridItem
-}
-
-function createHeaderBlock(headerText){
-    let header = document.createElement('h3');
-    header.innerText = headerText
-    return header
-}
-
-function createImageBlock(speciesName){
-    let image = document.createElement('img')
-    image.src = getDinoFilename(speciesName)
-    return image
-}
-
-function createFactBlock(factText){
-    let fact = document.createElement('p')
-    fact.innerText = factText
-    return fact
-}
-
-function createDinoTile(dinoObject){
-    
-    let gridItem = createGridItem()
-    let header = createHeaderBlock(dinoObject['species'])
-    let image = createImageBlock(dinoObject['species'])
-    let fact = createFactBlock(dinoObject['fact'])
-
-    gridItem.appendChild(header)
-    gridItem.appendChild(image)
-    gridItem.appendChild(fact)
-       
-    return gridItem
-}
-
-
-function createHumanTile(humanObject){
-    
-    let gridItem = createGridItem()
-    let header = createHeaderBlock(humanObject['name'])
-    let image = createImageBlock(humanObject['species'])
-
-    gridItem.appendChild(header)
-    gridItem.appendChild(image)
-       
-    return gridItem
-}
-
-
-function createTiles(){
-
-    //shuffle dinos
-    let shuffled_dinos = shuffleElements(dinos)
-
-    //create dino tiles
-    let gridItems = []
-    shuffled_dinos.forEach(function(item){
-        gridItems.push(createDinoTile(item))
-    })
-
-    //add human tile at the center
-    let humanItem = createHumanTile(Object.assign(human, {'species': 'human'}))
-    gridItems.splice(4,0, humanItem)
-
-    //add styletiles grid
-    for (let index = 0; index < gridItems.length; index++) {
-        gridItems[index].className = gridItems[index].className + ` grid-item:nth-child(${index + 1})`  
-    }
-
-    //add tiles to DOM
-    gridItems.forEach(function(item){
-        document.getElementById('grid').appendChild(item)
-    })
-}
-
-    
-
-/**
-* @description remove the form from the DOM
-* @param no params
-* @returns no returns
-*/
-function removeForm(){
-    let form = document.getElementById('dino-compare')
-    form.remove()
-}
-
-
-// On button click, prepare and display infographic
-function createInfographic(){
-    removeForm();
-    createTiles();
 }
