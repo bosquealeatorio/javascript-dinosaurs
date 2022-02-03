@@ -59,3 +59,10 @@ Some ideas might be to validate the form data to ensure the data is acceptable a
 ### Version Control
 
 Although not a requirement, we recommend using Git from the very beginning. Make sure to commit often and to use well-formatted commit messages that conform to our Git Style Guide.
+
+
+### Resources 
+
+Project Rubric: https://review.udacity.com/#!/rubrics/2786/view
+JavaScript Style Guide: http://udacity.github.io/frontend-nanodegree-styleguide/javascript.html
+The definitive guide to Object Oriented JavaScript: https://www.youtube.com/watch?v=PMfcsYzj-9M&list=LL&index=5&t=6s
